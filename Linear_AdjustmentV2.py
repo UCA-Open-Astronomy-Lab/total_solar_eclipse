@@ -99,8 +99,12 @@ adj_num = pre_average - post_average
 #Creates the linear adjustment function
 m = adj_num/(date[-1]- date[index_1st])
 adjustment_function = []
+
+#This part sets the part of the function from 0 to 1st contact to 0 as to not effect that first part with the adjustment function.
 for i in range(0, index_1st):
     adjustment_function.append(0)
+
+#This part is the adjustment function, which affects the data from 1st contact to the last point of data.
 for i in range(index_1st, index_final+1):
     adjustment_function.append(m*(date[i]- date[index_1st]))
 
