@@ -98,16 +98,16 @@ adj_num = pre_average - post_average
 
 #Creates the linear adjustment function
 m = adj_num/(date[-1]- date[index_1st])
-adj = []
+adjustment_function = []
 for i in range(0, index_1st):
-    adj.append(0)
+    adjustment_function.append(0)
 for i in range(index_1st, index_final+1):
-    adj.append(m*(date[i]- date[index_1st]))
+    adjustment_function.append(m*(date[i]- date[index_1st]))
 
 """Graphs Data"""
 plt.plot(date, r_pol, label = "Raw Data")#not adjusted Graph
-plt.plot(date, r_pol + adj, label = "Skew Adjusted Data")#adjusted Graph
-plt.plot(date, adj, label = "Linear Adjustment Function")#Linear adjustment
+plt.plot(date, r_pol + adjustment_function, label = "Skew Adjusted Data")#adjusted Graph
+plt.plot(date, adjustment_function, label = "Linear Adjustment Function")#Linear adjustment
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
 plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
