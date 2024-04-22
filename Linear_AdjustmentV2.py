@@ -5,7 +5,7 @@ from matplotlib import dates
 import numpy as np
 
 """Data from the fits file"""
-hdu1 = fits.open("Eclipse_Data.fits")
+hdu1 = fits.open("data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
 data = hdu1[1].data
 t = Time(data['jd'], format='jd')
 date = data['jd']
