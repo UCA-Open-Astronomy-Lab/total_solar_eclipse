@@ -13,7 +13,7 @@ import matplotlib.image as mpimg
 import cv2
 from PIL import Image
 
-
+#test
 # get filename, sigma, and threshold value from command line
 filename = "EclipseStreamAnalysis/frame1.png"
 sigma = float(1.0) #controls how "Blurred" an image is, lower is clearer
