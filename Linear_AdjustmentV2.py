@@ -69,7 +69,7 @@ for i in range(len(date)):
         print("found 4th index", index_4th)
         break
 
-#"""Finds final contact index"""
+#"""Finds final data index"""
 for i in range(len(date)):
     if (final - date[i]) < epsilon:
         index_final = i
