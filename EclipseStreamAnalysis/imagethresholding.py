@@ -3,15 +3,12 @@
  *
  * usage: python Threshold.py <filename> <sigma> <threshold>
 """
-import sys
 import numpy as np
 import skimage.color
 import skimage.filters
 import skimage.io
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
-import cv2
-from PIL import Image
 
 #test
 # get filename, sigma, and threshold value from command line
@@ -37,6 +34,13 @@ sel[mask] = image[mask]
 
 # display the result
 imgplot = plt.imshow(sel)
-print("Number of non zero pixels THRESHOLD: ",np.count_nonzero(image))
-plt.show()
-print(image)
+#plt.show()
+
+sum = 0
+for i in range(len(sel[0:,0,0])):
+    for j in range(len(sel[0,0:,0])):
+        for k in range(len(sel[0,0,0:])):
+            if sel[i,j,k] > 0:
+                sum += 1
+                break
+print(sum)
