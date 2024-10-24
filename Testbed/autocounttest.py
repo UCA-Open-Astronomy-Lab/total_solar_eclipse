@@ -17,7 +17,7 @@ end_time = "03:18:47"
 crop_dimensions = '1300:1300:1300:500' #sets values for cropping, from left to right: Width of cropped video, height of cropped video, top left x coordinate of cropped video, top left y coordinate for cropped video
 
 #setting up test storage for pixel count info inital date = 2460409.2186657293
-SecondToJD = 1.1574e-5
+SecondToJD = 1.1574e-5 #Conversion factor for seconds to julian date
 t0 = 2460409.2186657293
 time = []#time in julian date of each pixel count
 pixelcount = []#pixelcount of frame with mask
@@ -36,13 +36,13 @@ for i in range(3*60+18): #keep in mind what j value you choose, as you will have
     
     filename = "Testbed/FrameStore/countframe.png"
     img = cv.imread(filename, cv.IMREAD_GRAYSCALE) #reads the image file and converts to grayscale
-    #The three thresholding items below are gaussian, mean, and global
-    #thresh = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, 
-                                       #   cv.THRESH_BINARY, 199, 5) 
-    #thresh = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_MEAN_C, 
-                                        #  cv.THRESH_BINARY, 199, 5) 
 
-    ret, thresh = cv.threshold(img, 127, 255, cv.THRESH_BINARY)#global threshold
+    #The four thresholding items below are gaussian, mean, otsu, and global
+    #thresh = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 199, 5) #Adaptive gaussian threholding
+    #thresh = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, 199, 5) #adaptive mean thresholding
+    ret, thresh = cv.threshold(img, 0, 255, cv.THRESH_OTSU)#Otsu threholding
+    #ret, thresh = cv.threshold(img, 127, 255, cv.THRESH_BINARY)#global threshold
+
     nonzero_pixel_count = np.sum(thresh > 0) #counts nonzero pixels of the thresholded image matrix
     pixelcount.append(nonzero_pixel_count) #adds the pixel count to a list to display as a graph
     time.append(t0 + (j)*SecondToJD) #counts the time
@@ -53,3 +53,5 @@ plt.title("2024-04-08 Total Solar Eclipse, Conway, AR 1429.25 MHz")
 plt.xlabel('JD Time')
 plt.ylabel('# of Pixels')
 plt.show()
+
+
