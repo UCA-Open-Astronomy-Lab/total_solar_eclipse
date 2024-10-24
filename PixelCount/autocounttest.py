@@ -5,6 +5,7 @@ import ffmpeg
 import datetime
 import os
 import pandas as pd
+import csv
 
 #Testing 
 #t_0 = 1:56:50
@@ -19,7 +20,7 @@ crop_dimensions = '1300:1300:1300:500' #sets values for cropping, from left to r
 
 #setting up test storage for pixel count info inital date = 2460409.2186657293
 SecondToJD = 1.1574e-5 #Conversion factor for seconds to julian date
-t0 = 2460409.2186657293
+t0 = 2460409.2036806
 time = []#time in julian date of each pixel count
 pixelcount = []#pixelcount of frame with mask
 
@@ -49,14 +50,9 @@ for i in range(3*60+18): #keep in mind what j value you choose, as you will have
     time.append(t0 + (j)*SecondToJD) #counts the time
     os.remove('PixelCount/FrameStore/countframe.png')
 
-# Create a 2D NumPy array
-arr = np.array([pixelcount, time])
-
-# Convert the array to a DataFrame
-df = pd.DataFrame(arr)
-
-# Save the DataFrame to a CSV file
-df.to_csv('PixelCount.csv', index=False, header=False)
+with open('PixelCount1.csv', 'w') as f:
+    writer = csv.writer(f)
+    writer.writerows((pixelcount, time))
 
 plt.plot(time, pixelcount, label = "Pixel Count")
 plt.title("2024-04-08 Total Solar Eclipse, Conway, AR 1429.25 MHz")
