@@ -22,9 +22,10 @@ t0 = 2460409.2186657293
 time = []#time in julian date of each pixel count
 pixelcount = []#pixelcount of frame with mask
 
-for i in range(3*60):
-    starttimeindex = str(datetime.timedelta(seconds = i*60))
-    endtimeindex = str(datetime.timedelta(seconds = i*60+1))
+for i in range(3*60+18): #keep in mind what j value you choose, as you will have to modulate in responce. Can be seconds or minutes
+    j = i*60 #change this value if you want to look at different time jumps. j = i is seconds, j = 60*i is minutes etc
+    starttimeindex = str(datetime.timedelta(seconds = j))
+    endtimeindex = str(datetime.timedelta(seconds = j+1))
     (
         ffmpeg.input(eclipse_mp4, ss=starttimeindex, to=endtimeindex)#the video we want to extract data from
         .filter('crop', *crop_dimensions.split(":"))#crops the video
@@ -34,17 +35,17 @@ for i in range(3*60):
     )
     
     filename = "Testbed/FrameStore/countframe.png"
-    img = cv.imread(filename, cv.IMREAD_GRAYSCALE)
-    
+    img = cv.imread(filename, cv.IMREAD_GRAYSCALE) #reads the image file and converts to grayscale
+    #The three thresholding items below are gaussian, mean, and global
     #thresh = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                        #   cv.THRESH_BINARY, 199, 5) 
     #thresh = cv.adaptiveThreshold(img, 255, cv.ADAPTIVE_THRESH_MEAN_C, 
                                         #  cv.THRESH_BINARY, 199, 5) 
 
-    ret, thresh = cv.threshold(img, 127, 255, cv.THRESH_BINARY)
-    nonzero_pixel_count = np.sum(thresh > 0)
-    pixelcount.append(nonzero_pixel_count)
-    time.append(t0 + (i)*SecondToJD)
+    ret, thresh = cv.threshold(img, 127, 255, cv.THRESH_BINARY)#global threshold
+    nonzero_pixel_count = np.sum(thresh > 0) #counts nonzero pixels of the thresholded image matrix
+    pixelcount.append(nonzero_pixel_count) #adds the pixel count to a list to display as a graph
+    time.append(t0 + (j)*SecondToJD) #counts the time
     os.remove('Testbed/FrameStore/countframe.png')
 
 plt.plot(time, pixelcount, label = "Pixel Count")
