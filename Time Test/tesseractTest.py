@@ -52,39 +52,39 @@ for i in range(3*60+18): #keep in mind what j value you choose, as you will have
 
     """Optical Character Recognition"""
     filename = 'Time Test/timeframe test/timeframe.png'
-    img1 = np.array(Image.open(filename))
-    time = pytesseract.image_to_string(img1)
+    img1 = np.array(Image.open(filename))#turnsimage into array
+    time = pytesseract.image_to_string(img1)#tesseract views image and finds characters
     print("Time Before Editing: ", time)
-    if(time[1] == ':'): 
+    if(time[1] == ':'): #adds a 0 in front of numbers after 12
         time = "0"+time
-    if(time[1] == '7'):
+    if(time[1] == '7'):#takes care of error where tesseract mistakes leading 1 and 2 for a 7
         time = error + time[2:8]
-    if(time[0] == ':'):
+    if(time[0] == ':'): #takes care of error where tesseract misses the first two numbers, leaving a ':' as first char
         time = error+time
-    if(time[0] == '0'):
+    if(time[0] == '0'):#converts to 24h time
         time = str(12+int(time[1]))+time[2:8]
 
-    time = time[:8]
+    time = time[:8]#cuts down time string to '00:00:00' format
     timestring.append(time)
 
-    with open('Time Test/timeframe test/clocktime.csv', 'w') as f:
+    with open('Time Test/timeframe test/clocktime.csv', 'w') as f:#saves timestring to csv to view any errors
         writer = csv.writer(f)
         writer.writerows((timestring))
 
     print("time post editing:", time)
 
-    CST = datetime.datetime.fromisoformat('2024-04-08T'+time)
+    CST = datetime.datetime.fromisoformat('2024-04-08T'+time)#converts to date format
     ts = datetime.datetime.timestamp(CST)
-    UTC = datetime.datetime.fromtimestamp(ts, datetime.timezone.utc)
+    UTC = datetime.datetime.fromtimestamp(ts, datetime.timezone.utc)#converts to utc
 
-    pdts = pd.Timestamp(UTC)
-    jd = pdts.to_julian_date()
+    pdts = pd.Timestamp(UTC)#converts to timestamp for julian date conversion
+    jd = pdts.to_julian_date()#converts to julian date
     print("time:,", time)
     print("CST: ",CST)
     print("UTC: ",UTC)
     print("Julian Date: ",jd)
 
-    error = time[0]+time[1]
+    error = time[0]+time[1]# saves first two characters to fix errors above with
 
     clocktime.append(jd)
     os.remove('Time Test/timeframe test/timeframe.png')
