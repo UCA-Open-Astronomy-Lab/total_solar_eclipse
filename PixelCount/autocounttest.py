@@ -20,7 +20,7 @@ crop_dimensions = '1300:1300:1300:500' #sets values for cropping, from left to r
 
 #setting up test storage for pixel count info inital date = 2460409.2186657293
 SecondToJD = 1.1574e-5 #Conversion factor for seconds to julian date
-t0 = 2460409.2036806
+t0 = 2460409.162013889#This is the real start date based on the time of the video #2460409.2036806
 time = []#time in julian date of each pixel count
 pixelcount = []#pixelcount of frame with mask
 
@@ -50,7 +50,7 @@ for i in range(3*60+18): #keep in mind what j value you choose, as you will have
     time.append(t0 + (j)*SecondToJD) #counts the time
     os.remove('PixelCount/FrameStore/countframe.png')
 
-with open('PixelCount1.csv', 'w') as f:
+with open('data/PixelCount.csv', 'w') as f:
     writer = csv.writer(f)
     writer.writerows((pixelcount, time))
 
