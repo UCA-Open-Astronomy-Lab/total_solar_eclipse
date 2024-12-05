@@ -22,10 +22,10 @@ clocktime = []#the time from the clock in the video
 pixelcount = []#pixelcount of frame with mask
 timestring = []
 
-for i in range(3*60+18): #keep in mind what j value you choose, as you will have to modulate in responce. Can be seconds or minutes
+for i in range(3*60+18+1): #keep in mind what j value you choose, as you will have to modulate in responce. Can be seconds or minutes
     j = i*60 #change this value if you want to look at different time jumps. j = i is seconds, j = 60*i is minutes etc
-    starttimeindex = str(datetime.timedelta(seconds = j))
-    endtimeindex = str(datetime.timedelta(seconds = j+1))
+    starttimeindex = str(datetime.timedelta(seconds = 46+j))
+    endtimeindex = str(datetime.timedelta(seconds = 46+j+1))
     (
         ffmpeg.input(eclipse_mp4, ss=starttimeindex, to=endtimeindex)#the video we want to extract data from
         .filter('crop', *pixel_crop_dimensions.split(":"))#crops the video
@@ -57,10 +57,16 @@ for i in range(3*60+18): #keep in mind what j value you choose, as you will have
     print("Time Before Editing: ", time)
     if(time[1] == ':'): #adds a 0 in front of numbers after 12
         time = "0"+time
-    if(time[1] == '7'):#takes care of error where tesseract mistakes leading 1 and 2 for a 7
-        time = error + time[2:8]
+    if (time[1] == '7' or time[1] == '5'):#takes care of error where tesseract mistakes leading 1 and 2 for a 7
+        time = error1 + time[2:8]
     if(time[0] == ':'): #takes care of error where tesseract misses the first two numbers, leaving a ':' as first char
-        time = error+time
+        time = error1+time
+    if(time[2] != ':'):
+         time = error1+":"+time[3:8]
+    if(time[3] == ':'):
+         time = time[0:3]+error2+time[5:8]
+    if(time[5] != ':'):
+         time = time[0:5]+':'+error3
     if(time[0] == '0'):#converts to 24h time
         time = str(12+int(time[1]))+time[2:8]
 
@@ -68,8 +74,8 @@ for i in range(3*60+18): #keep in mind what j value you choose, as you will have
     timestring.append(time)
 
     with open('Time Test/timeframe test/clocktime.csv', 'w') as f:#saves timestring to csv to view any errors
-        writer = csv.writer(f)
-        writer.writerows((timestring))
+            writer = csv.writer(f)
+            writer.writerows((timestring))
 
     print("time post editing:", time)
 
@@ -84,12 +90,20 @@ for i in range(3*60+18): #keep in mind what j value you choose, as you will have
     print("UTC: ",UTC)
     print("Julian Date: ",jd)
 
-    error = time[0]+time[1]# saves first two characters to fix errors above with
+    error1 = time[0:2]# saves first two characters to fix errors above with
+    error2 = str(int(time[3:5])+1)
+    error3 = str(int(time[6:8])+1)
 
     clocktime.append(jd)
     os.remove('Time Test/timeframe test/timeframe.png')
 
+with open('Time Test/timeframe test/clockjd.csv', 'w') as f:#saves timestring to csv to view any errors
+        writer = csv.writer(f)
+        writer.writerow((clocktime))
 
+with open('data/PixelCount.csv', 'w') as f:
+    writer = csv.writer(f)
+    writer.writerows((pixelcount, videotime))
 
 """
 with open('data/PixelCount.csv', 'w') as f:
@@ -104,3 +118,17 @@ plt.title("Comparison of clock time and video time")
 plt.ylabel('JD Time')
 plt.xlabel('Frame #')
 plt.show()
+'''
+"""Graphs Data"""
+plt.plot(date, r_pol + adjustment_function, label = "Adjusted Radio Data")#adjusted Graph
+plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
+plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
+plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
+plt.axvline(x = date[index_4th], color = 'r', linestyle = '-') #4th contact
+plt.title("2024-04-08 Total Solar Eclipse, Conway, AR 1429.25 MHz")
+plt.xlabel('JD Time')
+plt.ylabel('%\ of total')
+plt.legend()
+plt.savefig("RadioVisualComparison.png")
+plt.show()
+'''
