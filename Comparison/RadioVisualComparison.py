@@ -4,6 +4,9 @@ from astropy.time import Time
 from matplotlib import dates
 import numpy as np
 import csv
+import scipy.signal
+
+from sqlalchemy import null
 
 """Data from the fits file"""
 hdu1 = fits.open("data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
@@ -112,7 +115,7 @@ for i in range(index_1st, index_final+1):
 """Making Visual Data counts into percentage"""
 
 def read_lines():
-    with open('PixelCount.csv', 'rU') as data:
+    with open('data/PixelCount.csv', 'rU') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -122,28 +125,55 @@ xy = list(read_lines())
 count = xy[0][:]
 time = xy[1][:]
 
-print("Tf: ", time[-1])
+def read_lines2():
+    with open('Time Test/timeframe test/clockjd.csv', 'rU') as data:
+        reader = csv.reader(data)
+        for row in reader:
+            yield [ float(i) for i in row ]
+x = list(read_lines2())
+clocktime = x[0][:]
 
+cti1 = 0
+cti2 = 0
+cti3 = 0
+cti4 = 0
+error1 = 1
+error2 = 1
+
+for i in range(len(count)):
+    if(count[i] == 91537):#cuts out the no signal section
+        count[i] = None
+    if(abs(contact2nd - clocktime[i]) <= error1):
+        error1 = abs(clocktime[i] - contact2nd)
+        cti1 =i
+    if(abs(clocktime[i] - contact3rd) <= error2):
+        error2 = abs(clocktime[i] - contact3rd)
+        cti2 = i
+for i in range(cti1, cti2):
+    count[i] = None
+for i in range(1):
+    count[i] = None
+
+
+#makes the data out of 100%
 sum = 0
-for i in range(10):
+for i in range(1,11):
     sum += count[i]
 topaverage = sum/10
 
 percentcount = np.array(count)
-percentcount = (percentcount*100)/topaverage
+for i in range(len(count)):
+    if(percentcount[i] != None):
+        percentcount[i] = (percentcount[i]*100)/topaverage
 percentcount = percentcount.tolist()
 
-print("Radio t0:", date[0])
-print("Visual t0:", time[0])
-print("Radio tf:", date[-1])
-print("Visual tf:", time[-1])
-print("Radio-Visual end time difference (seconds): ", (date[-1]-time[-1])*24*60*60)
+r_pol_filter = scipy.signal.savgol_filter(r_pol + adjustment_function, 51, 0) #smoothed radio data
 
-
-plt.plot(time, percentcount, label = "Adjusted Visual Data")#Linear adjustment
+rpolerror = 6.372 #found the highest point above 100 and subtracted it from the rest
 
 """Graphs Data"""
-plt.plot(date, r_pol + adjustment_function, label = "Adjusted Radio Data")#adjusted Graph
+plt.plot(date, r_pol_filter - rpolerror, label = "Adjusted Radio Data")#Radio Data
+plt.plot(clocktime, percentcount, label = "Adjusted Visual Data", color = 'orange')#Visual Data
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
 plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
