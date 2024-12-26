@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 from astropy.time import Time
 from matplotlib import dates
 import numpy as np
+import pandas as pd
 import csv
 import scipy.signal
-
+import datetime 
 from sqlalchemy import null
 
 """Data from the fits file"""
@@ -171,14 +172,60 @@ r_pol_filter = scipy.signal.savgol_filter(r_pol + adjustment_function, 51, 0) #s
 
 rpolerror = 6.372 #found the highest point above 100 and subtracted it from the rest
 
+'''Light Sensor Data'''
+# Read the CSV file into a DataFrame
+df = pd.read_csv("data/light_sensor.csv")
+
+time_sensor = df["Run 2: Time (h)"]
+illumination_sensor = df["Run 2: Illumination (lux)"]/1080
+uvb_sensor = df["Run 2: UVB Intensity (mW/m²)"]/6.3
+uva_sensor = df["Run 2: UVA Intensity (mW/m²)"]/108
+
+time_sensor = time_sensor.values.tolist()
+illumination_sensor = illumination_sensor.values.tolist()
+uvb_sensor = uvb_sensor.values.tolist()
+uva_sensor = uva_sensor.values.tolist()
+jd_sensor = []
+
+for i in range(len(time_sensor)):
+    CST = datetime.datetime.fromisoformat('2024-04-08T'+time_sensor[i])
+    ts = datetime.datetime.timestamp(CST)
+    UTC = datetime.datetime.fromtimestamp(ts, datetime.timezone.utc)
+
+    pdts = pd.Timestamp(UTC)
+    jd = pdts.to_julian_date()
+    jd_sensor.append(jd)
+
+
+
+
+
+
+
+
 """Graphs Data"""
+#Light Sensor Plots
+'''plt.plot(jd_sensor, illumination_sensor, label = "Light Sensor Illumination")#Radio Data
+plt.plot(jd_sensor, uvb_sensor, label = "Light Sensor UVB")#Radio Data
+plt.plot(jd_sensor, uva_sensor, label = "Light Sensor UVA")#Radio Data
+'''
+radio_min = 100
+for i in range(len(r_pol_filter)):
+    if (r_pol_filter[i] - rpolerror) < radio_min:
+        radio_min = r_pol_filter[i] - rpolerror
+
+print('Radio Minimum: ', radio_min)
+print('Visual Minimum: ', 0)
+
+
+
 plt.plot(date, r_pol_filter - rpolerror, label = "Adjusted Radio Data")#Radio Data
-plt.plot(clocktime, percentcount, label = "Adjusted Visual Data", color = 'orange')#Visual Data
+plt.plot(clocktime, percentcount, label = "Adjusted Visual Data", color = "black")#Visual Data
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
 plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
 plt.axvline(x = date[index_4th], color = 'r', linestyle = '-') #4th contact
-plt.title("2024-04-08 Total Solar Eclipse, Conway, AR 1429.25 MHz")
+plt.title("Radio vs Visual Data")
 plt.xlabel('JD Time')
 plt.ylabel('%\ of total')
 plt.legend()
