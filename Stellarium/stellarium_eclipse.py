@@ -1,4 +1,6 @@
 import requests
+import time
+import numpy as np
 STELLARIUM_URL='http://localhost:8090'
 
 def set_time(julian_day,timerate):
@@ -37,12 +39,41 @@ def focus_on_target(target):
         print(f"Error setting target: {e}")
         return {"status": "error", "message": str(e)}
 
-set_time(2460409.285573, 1.0)
+
+t_start = 2460409.1902778
+t_end = 2460409.3833333
+N = 1000
+dt = (t_end - t_start)/N
+
 focus_on_target("sun")
 
-r = requests.get(f"{STELLARIUM_URL}/api/objects/info?format=json")
-data = r.json()
-print(data["eclipse-obscuration"])
+t = t_start
+times = []
+
+eclipse_obscuration = []
+
+while t <= t_end:
+    set_time(t, 0.0)
+    time.sleep(0.1)
+    r = requests.get(f"{STELLARIUM_URL}/api/objects/info?format=json")
+    data = r.json()
+    times.append(t)
+    eclipse_obscuration.append(data["eclipse-obscuration"])
+    t += dt
+
+results = np.column_stack([times, eclipse_obscuration])
+
+np.savetxt("stellarium_lightcurve.csv", results, delimiter=",")
+
+print(eclipse_obscuration)
+
+
+#set_time(2460409.295573, 1.0)
+#focus_on_target("sun")
+#r = requests.get(f"{STELLARIUM_URL}/api/objects/info?format=json")
+#data = r.json()
+#print(data["eclipse-obscuration"])
+
 
 
 
