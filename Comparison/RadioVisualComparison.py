@@ -7,10 +7,10 @@ import pandas as pd
 import csv
 import scipy.signal
 import datetime 
-from sqlalchemy import null
+#from sqlalchemy import null
 
 """Data from the fits file"""
-hdu1 = fits.open("data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
+hdu1 = fits.open("../data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
 data = hdu1[1].data
 t = Time(data['jd'], format='jd')
 date = data['jd']
@@ -116,7 +116,7 @@ for i in range(index_1st, index_final+1):
 """Making Visual Data counts into percentage"""
 
 def read_lines():
-    with open('data/PixelCount.csv', 'rU') as data:
+    with open('../data/PixelCount.csv', 'rU') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -127,7 +127,7 @@ count = xy[0][:]
 time = xy[1][:]
 
 def read_lines2():
-    with open('Time Test/timeframe test/clockjd.csv', 'rU') as data:
+    with open('../Time Test/timeframe test/clockjd.csv', 'rU') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -174,7 +174,7 @@ rpolerror = 6.372 #found the highest point above 100 and subtracted it from the 
 
 '''Light Sensor Data'''
 # Read the CSV file into a DataFrame
-df = pd.read_csv("data/light_sensor.csv")
+df = pd.read_csv("../data/light_sensor.csv")
 
 time_sensor = df["Run 2: Time (h)"]
 illumination_sensor = df["Run 2: Illumination (lux)"]/1080
@@ -198,7 +198,9 @@ for i in range(len(time_sensor)):
 
 
 
+# Adding the Stellarium data
 
+stellarium_lightcurve = np.genfromtxt("../Stellarium/stellarium_lightcurve.csv", delimiter=",")
 
 
 
@@ -221,6 +223,7 @@ print('Visual Minimum: ', 0)
 
 plt.plot(date, r_pol_filter - rpolerror, label = "Adjusted Radio Data")#Radio Data
 plt.plot(clocktime, percentcount, label = "Adjusted Visual Data", color = "black")#Visual Data
+plt.plot(stellarium_lightcurve[:,0], 100-stellarium_lightcurve[:,1], label = "Eclipse Percentage (Stellarium)", color = "green")#Stellarium Data
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
 plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
