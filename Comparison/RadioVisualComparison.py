@@ -10,7 +10,7 @@ import datetime
 #from sqlalchemy import null
 
 """Data from the fits file"""
-hdu1 = fits.open("../data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
+hdu1 = fits.open("data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
 data = hdu1[1].data
 t = Time(data['jd'], format='jd')
 date = data['jd']
@@ -114,9 +114,8 @@ for i in range(index_1st, index_final+1):
     adjustment_function.append(m*(date[i]- date[index_1st]))
 
 """Making Visual Data counts into percentage"""
-
 def read_lines():
-    with open('../data/PixelCount.csv', 'rU') as data:
+    with open('data/PixelCount.csv', 'rU') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -127,7 +126,7 @@ count = xy[0][:]
 time = xy[1][:]
 
 def read_lines2():
-    with open('../Time Test/timeframe test/clockjd.csv', 'rU') as data:
+    with open('Time Test/timeframe test/clockjd.csv', 'rU') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -155,8 +154,8 @@ for i in range(cti1, cti2):
 for i in range(1):
     count[i] = None
 
-
-#makes the data out of 100%
+'''Converting Livestream data to percentage'''
+#finds average value of first ten counts pre eclipse
 sum = 0
 for i in range(1,11):
     sum += count[i]
@@ -168,13 +167,28 @@ for i in range(len(count)):
         percentcount[i] = (percentcount[i]*100)/topaverage
 percentcount = percentcount.tolist()
 
+
+'''Normalizing and smoothing Radio Data'''
 r_pol_filter = scipy.signal.savgol_filter(r_pol + adjustment_function, 51, 0) #smoothed radio data
 
 rpolerror = 6.372 #found the highest point above 100 and subtracted it from the rest
 
+def normalization(lightcurve):
+    high = 0
+    for i in range(len(lightcurve)):
+        if (lightcurve[i] >= high):
+            high = lightcurve[i]
+
+    n = high/100
+
+    return lightcurve/n
+
+normalSmooth_r_pol_filter = scipy.signal.savgol_filter(normalization(r_pol + adjustment_function), 51, 0)
+
+
 '''Light Sensor Data'''
 # Read the CSV file into a DataFrame
-df = pd.read_csv("../data/light_sensor.csv")
+df = pd.read_csv("data/light_sensor.csv")
 
 time_sensor = df["Run 2: Time (h)"]
 illumination_sensor = df["Run 2: Illumination (lux)"]/1080
@@ -200,37 +214,61 @@ for i in range(len(time_sensor)):
 
 # Adding the Stellarium data
 
-stellarium_lightcurve = np.genfromtxt("../Stellarium/stellarium_lightcurve.csv", delimiter=",")
+stellarium_lightcurve = np.genfromtxt("Stellarium/stellarium_lightcurve.csv", delimiter=",")
 
+
+"""Ratios For Data Conservation"""
+
+def dataRatio(lightcurve):
+    high = 0
+    for i in range(len(lightcurve)):
+        if (lightcurve[i] >= high):
+            high = lightcurve[i]
+
+    low = 100
+    for i in range(len(lightcurve)):
+        if (lightcurve[i] <= low):
+            low = lightcurve[i]
+    
+    return high/low
+print("Baseline Radio (Tracking Error Adjustment Only): ",dataRatio(r_pol + adjustment_function))
+print("Smoothed Baseline Radio (Tracking Error Adjustment + Smoothed): ",dataRatio(r_pol_filter))
+print("Smoothed Adjusted - 6.372(sensor error) Ratio: ",dataRatio(r_pol_filter - rpolerror))
+print("Smooth/Normal Ratio: ",dataRatio(normalization(r_pol_filter)))
+print("Normal/Smooth Ratio: ",dataRatio(normalSmooth_r_pol_filter))
 
 
 
 """Graphs Data"""
+plt.figure(figsize=(12, 8)) 
+
 #Light Sensor Plots
-'''plt.plot(jd_sensor, illumination_sensor, label = "Light Sensor Illumination")#Radio Data
-plt.plot(jd_sensor, uvb_sensor, label = "Light Sensor UVB")#Radio Data
-plt.plot(jd_sensor, uva_sensor, label = "Light Sensor UVA")#Radio Data
+#plt.plot(jd_sensor, illumination_sensor, label = "Light Sensor Illumination", color = 'orange')#Radio Data
+
+#New normalization
+plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Blue')#RADIO Smoothed/Normalization
+#plt.plot(date, normalSmooth_r_pol_filter, label = "Normal/Smooth")#Normalization/Smoothed
+
+
+
+#Old normalization (WRONG)
 '''
-radio_min = 100
-for i in range(len(r_pol_filter)):
-    if (r_pol_filter[i] - rpolerror) < radio_min:
-        radio_min = r_pol_filter[i] - rpolerror
+plt.plot(date, r_pol  + adjustment_function, label = "Baseline Radio (Tracking Error Adjustment Only)")#Radio Data
+plt.plot(date, r_pol_filter, label = "Smoothed Baseline Radio (Tracking Error Adjustment + Smoothed)")#Radio Data
+plt.plot(date, r_pol_filter - rpolerror, label = "Smoothed Adjusted Radio Data - 6.372(sensor error)")#Radio Data
+'''
 
-print('Radio Minimum: ', radio_min)
-print('Visual Minimum: ', 0)
-
-
-
-plt.plot(date, r_pol_filter - rpolerror, label = "Adjusted Radio Data")#Radio Data
-plt.plot(clocktime, percentcount, label = "Adjusted Visual Data", color = "black")#Visual Data
+#plt.plot(date, r_pol_filter - rpolerror, label = "Adjusted Radio Data", color = 'Blue')#Radio Data
+plt.plot(clocktime, percentcount, label = "Adjusted Livestream Data", color = "black")#Visual Data
 plt.plot(stellarium_lightcurve[:,0], 100-stellarium_lightcurve[:,1], label = "Eclipse Percentage (Stellarium)", color = "green")#Stellarium Data
+
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
 plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
 plt.axvline(x = date[index_4th], color = 'r', linestyle = '-') #4th contact
-plt.title("Radio vs Visual Data")
+plt.title("Radio vs Visible Lightcurve")
 plt.xlabel('JD Time')
-plt.ylabel('%\ of total')
+plt.ylabel('% of total')
 plt.legend()
-plt.savefig("RadioVisualComparison.png")
+plt.savefig("testgraph.png")
 plt.show()
