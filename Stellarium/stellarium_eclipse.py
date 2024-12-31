@@ -50,6 +50,7 @@ focus_on_target("sun")
 t = t_start
 times = []
 
+eclipse_magnitude = []
 eclipse_obscuration = []
 
 while t <= t_end:
@@ -59,9 +60,10 @@ while t <= t_end:
     data = r.json()
     times.append(t)
     eclipse_obscuration.append(data["eclipse-obscuration"])
+    eclipse_magnitude.append(data["eclipse-magnitude"])    
     t += dt
 
-results = np.column_stack([times, eclipse_obscuration])
+results = np.column_stack([times, eclipse_obscuration, eclipse_magnitude])
 
 np.savetxt("stellarium_lightcurve.csv", results, delimiter=",")
 
