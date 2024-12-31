@@ -204,7 +204,6 @@ stellarium_lightcurve = np.genfromtxt("../Stellarium/stellarium_lightcurve.csv",
 
 
 
-
 """Graphs Data"""
 #Light Sensor Plots
 '''plt.plot(jd_sensor, illumination_sensor, label = "Light Sensor Illumination")#Radio Data
