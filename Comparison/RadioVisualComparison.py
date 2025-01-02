@@ -1,5 +1,6 @@
 from astropy.io import fits
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from astropy.time import Time
 from matplotlib import dates
 import numpy as np
@@ -171,8 +172,6 @@ percentcount = percentcount.tolist()
 '''Normalizing and smoothing Radio Data'''
 r_pol_filter = scipy.signal.savgol_filter(r_pol + adjustment_function, 51, 0) #smoothed radio data
 
-rpolerror = 6.372 #found the highest point above 100 and subtracted it from the rest
-
 def normalization(lightcurve):
     high = 0
     for i in range(len(lightcurve)):
@@ -191,14 +190,11 @@ normalSmooth_r_pol_filter = scipy.signal.savgol_filter(normalization(r_pol + adj
 df = pd.read_csv("data/light_sensor.csv")
 
 time_sensor = df["Run 2: Time (h)"]
-illumination_sensor = df["Run 2: Illumination (lux)"]/1080
-uvb_sensor = df["Run 2: UVB Intensity (mW/m²)"]/6.3
-uva_sensor = df["Run 2: UVA Intensity (mW/m²)"]/108
+illumination_sensor = df["Run 2: Illumination (lux)"]
+
+normal_illumination_sensor = normalization(illumination_sensor)
 
 time_sensor = time_sensor.values.tolist()
-illumination_sensor = illumination_sensor.values.tolist()
-uvb_sensor = uvb_sensor.values.tolist()
-uva_sensor = uva_sensor.values.tolist()
 jd_sensor = []
 
 for i in range(len(time_sensor)):
@@ -218,7 +214,7 @@ stellarium_lightcurve = np.genfromtxt("Stellarium/stellarium_lightcurve.csv", de
 
 
 """Ratios For Data Conservation"""
-
+'''
 def dataRatio(lightcurve):
     high = 0
     for i in range(len(lightcurve)):
@@ -236,38 +232,67 @@ print("Smoothed Baseline Radio (Tracking Error Adjustment + Smoothed): ",dataRat
 print("Smoothed Adjusted - 6.372(sensor error) Ratio: ",dataRatio(r_pol_filter - rpolerror))
 print("Smooth/Normal Ratio: ",dataRatio(normalization(r_pol_filter)))
 print("Normal/Smooth Ratio: ",dataRatio(normalSmooth_r_pol_filter))
+'''
+'''
+low = 100
+for i in range(len(r_pol)):
+    if (normalization(r_pol_filter)[i] <= low):
+        low = normalization(r_pol_filter)[i]
+    
 
-
+print("Radio Obscuration Minimum: ",low)
+'''
 """Graphs Data"""
+'''colors: green, black, orange, blue, red '''
+
+
 plt.figure(figsize=(12, 8)) 
+widthline = 3
+
+#Radio Telescope Plots
+#Frame 1: raw
+#plt.plot(date, r_pol, label = "Raw Radio Data", color = 'Green', linewidth=widthline)#RADIO raw
+
+#Frame 2: raw, adjustment function
+#plt.plot(date, r_pol, label = "Raw Radio Data", color = 'Green', linewidth=widthline)#RADIO raw
+#plt.plot(date, adjustment_function, label = "Tracking Adjustment Function", linewidth=widthline)#RADIO raw
+
+#Frame 3: adjusted radio data
+#plt.plot(date, r_pol + adjustment_function, label = "Adjusted Radio Data", color = 'Green', linewidth=widthline)#RADIO raw
+
+#Frame 4: Smoothed
+#plt.plot(date, r_pol_filter, label = "Smoothed Radio Data", color = 'Green', linewidth=widthline)#RADIO Smoothed/Normalization
+
+#Frame 5: Smoothed/Normalized
+#plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Green', linewidth=widthline)#RADIO Smoothed/Normalization
 
 #Light Sensor Plots
-#plt.plot(jd_sensor, illumination_sensor, label = "Light Sensor Illumination", color = 'orange')#Radio Data
+plt.plot(jd_sensor, normal_illumination_sensor, label = "Light Sensor Lightcurve (Normalized)", linewidth=widthline)#Light Sensor Visible Data
 
-#New normalization
-plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Blue')#RADIO Smoothed/Normalization
-#plt.plot(date, normalSmooth_r_pol_filter, label = "Normal/Smooth")#Normalization/Smoothed
+#Stellarium Theoretical Plots
+plt.plot(stellarium_lightcurve[:,0], 100-stellarium_lightcurve[:,1], label = "Theoretical Lightcurve (Stellarium)", color = "orange", linewidth=widthline)#Stellarium Data
 
-
-
-#Old normalization (WRONG)
-'''
-plt.plot(date, r_pol  + adjustment_function, label = "Baseline Radio (Tracking Error Adjustment Only)")#Radio Data
-plt.plot(date, r_pol_filter, label = "Smoothed Baseline Radio (Tracking Error Adjustment + Smoothed)")#Radio Data
-plt.plot(date, r_pol_filter - rpolerror, label = "Smoothed Adjusted Radio Data - 6.372(sensor error)")#Radio Data
-'''
-
-#plt.plot(date, r_pol_filter - rpolerror, label = "Adjusted Radio Data", color = 'Blue')#Radio Data
-plt.plot(clocktime, percentcount, label = "Adjusted Livestream Data", color = "black")#Visual Data
-plt.plot(stellarium_lightcurve[:,0], 100-stellarium_lightcurve[:,1], label = "Eclipse Percentage (Stellarium)", color = "green")#Stellarium Data
+#Livestream Plots
+plt.plot(clocktime, percentcount, label = "Livestream Lightcurve (Normalized)", color = "blue", linewidth=widthline/2)#Visual Data
 
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
 plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
 plt.axvline(x = date[index_4th], color = 'r', linestyle = '-') #4th contact
-plt.title("Radio vs Visible Lightcurve")
-plt.xlabel('JD Time')
-plt.ylabel('% of total')
-plt.legend()
-plt.savefig("testgraph.png")
+
+#Design
+titlesize = 35
+labelsize = 25
+ticksize = 20
+legendsize = 14
+
+plt.title("Visible Lightcurve Data Analysis", fontsize = titlesize)
+plt.xlabel('Julian Date', fontsize = labelsize)
+plt.ylabel('Percent Obscuration', fontsize = labelsize)
+plt.xticks(fontsize = ticksize)
+plt.yticks(fontsize = ticksize)
+plt.ylim(-5,120)
+plt.xlim(2460409.16,2460409.39)
+plt.legend(fontsize = legendsize, loc='lower left')
+plt.savefig("OpticalFrame3.png")
 plt.show()
