@@ -44,7 +44,7 @@ def obscuration(r_sun, r_moon, sep):
 
 # Rough code to generate a bunch of theoretical curves.
 
-sun_diameter_factors = [1, 1.05, 1.10, 1.15, 1.20, 1.25, 1.3, 1.35, 1.4, 1.45]
+sun_diameter_factors = [1, 1.05, 1.10, 1.15, 1.20, 1.25, 1.27, 1.3, 1.35, 1.4, 1.45]
 new_sun_angular_diameter = []
 
 for sun_diameter_factor in sun_diameter_factors:

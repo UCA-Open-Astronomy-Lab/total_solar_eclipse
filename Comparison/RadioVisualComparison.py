@@ -221,6 +221,7 @@ rsun_1p10 = np.genfromtxt("../EclipseModels/tse_radius_1.1.csv", delimiter=",", 
 rsun_1p15 = np.genfromtxt("../EclipseModels/tse_radius_1.15.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
 rsun_1p20 = np.genfromtxt("../EclipseModels/tse_radius_1.2.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
 rsun_1p25 = np.genfromtxt("../EclipseModels/tse_radius_1.25.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p27 = np.genfromtxt("../EclipseModels/tse_radius_1.27.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
 rsun_1p30 = np.genfromtxt("../EclipseModels/tse_radius_1.3.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
 rsun_1p35 = np.genfromtxt("../EclipseModels/tse_radius_1.35.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
 rsun_1p40 = np.genfromtxt("../EclipseModels/tse_radius_1.4.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
@@ -290,18 +291,25 @@ widthline = 2
 #plt.plot(clocktime, percentcount, label = "Livestream Lightcurve (Normalized)", color = "blue", linewidth=widthline/2)#Visual Data
 
 #"Real" theoretical lightcurve
-plt.plot(rsun_1p00[:,0], 100*rsun_1p00[:,1], label = "R/Rsun = 1.0", linewidth=widthline)
-plt.plot(rsun_1p05[:,0], 100*rsun_1p05[:,1], label = "R/Rsun = 1.05", linewidth=widthline)
-plt.plot(rsun_1p10[:,0], 100*rsun_1p10[:,1], label = "R/Rsun = 1.1", linewidth=widthline)
-plt.plot(rsun_1p15[:,0], 100*rsun_1p15[:,1], label = "R/Rsun = 1.15", linewidth=widthline)
-plt.plot(rsun_1p20[:,0], 100*rsun_1p20[:,1], label = "R/Rsun = 1.20", linewidth=widthline)
-plt.plot(rsun_1p25[:,0], 100*rsun_1p25[:,1], label = "R/Rsun = 1.25", linewidth=widthline)
-plt.plot(rsun_1p30[:,0], 100*rsun_1p30[:,1], label = "R/Rsun = 1.30", linewidth=widthline)
-plt.plot(rsun_1p35[:,0], 100*rsun_1p35[:,1], label = "R/Rsun = 1.35", linewidth=widthline)
-plt.plot(rsun_1p40[:,0], 100*rsun_1p40[:,1], label = "R/Rsun = 1.40", linewidth=widthline)
-plt.plot(rsun_1p45[:,0], 100*rsun_1p45[:,1], label = "R/Rsun = 1.45", linewidth=widthline)
-
 plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Green', linewidth=3)#RADIO Smoothed/Normalization
+plt.plot(rsun_1p30[:,0], 100*rsun_1p30[:,1], label = "R/Rsun = 1.30", linewidth=widthline)
+plt.plot(rsun_1p27[:,0], 100*rsun_1p27[:,1], label = "R/Rsun = 1.27", linewidth=widthline)
+plt.plot(rsun_1p25[:,0], 100*rsun_1p25[:,1], label = "R/Rsun = 1.25", linewidth=widthline)
+plt.plot(rsun_1p20[:,0], 100*rsun_1p20[:,1], label = "R/Rsun = 1.20", linewidth=widthline)
+plt.plot(rsun_1p10[:,0], 100*rsun_1p10[:,1], label = "R/Rsun = 1.10", linewidth=widthline)
+plt.plot(rsun_1p00[:,0], 100*rsun_1p00[:,1], label = "R/Rsun = 1.0", linewidth=widthline)
+#plt.plot(rsun_1p05[:,0], 100*rsun_1p05[:,1], label = "R/Rsun = 1.05", linewidth=widthline)
+
+#plt.plot(rsun_1p15[:,0], 100*rsun_1p15[:,1], label = "R/Rsun = 1.15", linewidth=widthline)
+
+
+
+
+#plt.plot(rsun_1p35[:,0], 100*rsun_1p35[:,1], label = "R/Rsun = 1.35", linewidth=widthline)
+#plt.plot(rsun_1p40[:,0], 100*rsun_1p40[:,1], label = "R/Rsun = 1.40", linewidth=widthline)
+#plt.plot(rsun_1p45[:,0], 100*rsun_1p45[:,1], label = "R/Rsun = 1.45", linewidth=widthline)
+
+
 
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
@@ -314,9 +322,9 @@ labelsize = 25
 ticksize = 20
 legendsize = 14
 
-plt.title("Radio Lightcurve Data Analysis", fontsize = titlesize)
+plt.title("Radio Lightcurve Fitting", fontsize = titlesize)
 plt.xlabel('Julian Date', fontsize = labelsize)
-plt.ylabel('Percent Obscuration', fontsize = labelsize)
+plt.ylabel('Relative Brightness', fontsize = labelsize)
 plt.xticks(fontsize = ticksize)
 plt.yticks(fontsize = ticksize)
 plt.ylim(-5,120)
