@@ -1,4 +1,5 @@
 import math
+import csv
 
 import matplotlib.pyplot as plt
 
@@ -31,9 +32,9 @@ def obscuration(r_sun, r_moon, sep):
         alpha_1 = 2 * math.acos(Y / r_sun)
         alpha_2 = 2 * math.acos((sep - Y) / r_moon)
         A1 = 0.5 * r_sun**2 * (alpha_1 - math.sin(alpha_1))
-        print("A1 = ", A1)
+     #   print("A1 = ", A1)
         A2 = 0.5 * r_moon**2 * (alpha_2 - math.sin(alpha_2))
-        print("A1 = ", A2)        
+     #   print("A1 = ", A2)        
         return (A1 + A2) / (math.pi * r_sun**2)
     elif r_moon > r_sun:
         return 1
@@ -41,30 +42,31 @@ def obscuration(r_sun, r_moon, sep):
         return r_moon**2 / r_sun**2
 
 
-for i in range(len(obs_time)):
-#    print("sun = ", sun_angular_diameter[i]/2)
-#    print("moon = ", moon_angular_diameter[i]/2)
-#    print("sep = ", separation[i])
-    if separation[i] <= (sun_angular_diameter[i]/2 + moon_angular_diameter[i]/2):
-        print("Eclipsing!", obs_time[i])
-        eclipse_percentage.append(1 - obscuration(sun_angular_diameter[i]/2, moon_angular_diameter[i]/2, separation[i]))
-    else:
-        eclipse_percentage.append(1.0)
+# Rough code to generate a bunch of theoretical curves.
 
-for i in range(len(obs_time)):
-#    print("sun = ", sun_angular_diameter[i]/2)
-#    print("moon = ", moon_angular_diameter[i]/2)
-#    print("sep = ", separation[i])
-    sun_angular_diameter[i] = 1.2 * sun_angular_diameter[i]
-    if separation[i] <= (sun_angular_diameter[i]/2 + moon_angular_diameter[i]/2):
-        print("Eclipsing!", obs_time[i])
-        eclipse_percentage_big_sun.append(1 - obscuration(sun_angular_diameter[i]/2, moon_angular_diameter[i]/2, separation[i]))
-    else:
-        eclipse_percentage_big_sun.append(1.0)
+sun_diameter_factors = [1, 1.05, 1.10, 1.15, 1.20, 1.25, 1.3, 1.35, 1.4, 1.45]
+new_sun_angular_diameter = []
 
-plt.plot(obs_time, eclipse_percentage)
-plt.plot(obs_time, eclipse_percentage_big_sun)
-plt.savefig("simulation.png")
+for sun_diameter_factor in sun_diameter_factors:
+
+    print(sun_diameter_factor)
+
+    with open("tse_radius_" + str(sun_diameter_factor) + ".csv", 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+
+        for i in range(len(obs_time)):
+
+            if separation[i] <= (sun_diameter_factor * sun_angular_diameter[i]/2 + moon_angular_diameter[i]/2):
+                eclipse_percentage_big_sun = 1 - obscuration(sun_diameter_factor * sun_angular_diameter[i]/2, moon_angular_diameter[i]/2, separation[i])
+                writer.writerow([obs_time[i], eclipse_percentage_big_sun])
+            else:
+                eclipse_percentage_big_sun = 1.0
+                writer.writerow([obs_time[i], eclipse_percentage_big_sun])
+                    
+
+#plt.plot(obs_time, eclipse_percentage)
+#plt.plot(obs_time, eclipse_percentage_big_sun)
+#plt.savefig("simulation.png")
 
 
 

@@ -11,7 +11,7 @@ import datetime
 #from sqlalchemy import null
 
 """Data from the fits file"""
-hdu1 = fits.open("data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
+hdu1 = fits.open("../data/20240408-171452_TPI-PROJ01-SUN_02#_01#.fits")
 data = hdu1[1].data
 t = Time(data['jd'], format='jd')
 date = data['jd']
@@ -116,7 +116,7 @@ for i in range(index_1st, index_final+1):
 
 """Making Visual Data counts into percentage"""
 def read_lines():
-    with open('data/PixelCount.csv', 'rU') as data:
+    with open('../data/PixelCount.csv', 'rU') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -127,7 +127,7 @@ count = xy[0][:]
 time = xy[1][:]
 
 def read_lines2():
-    with open('Time Test/timeframe test/clockjd.csv', 'rU') as data:
+    with open('../Time Test/timeframe test/clockjd.csv', 'rU') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -187,7 +187,7 @@ normalSmooth_r_pol_filter = scipy.signal.savgol_filter(normalization(r_pol + adj
 
 '''Light Sensor Data'''
 # Read the CSV file into a DataFrame
-df = pd.read_csv("data/light_sensor.csv")
+df = pd.read_csv("../data/light_sensor.csv")
 
 time_sensor = df["Run 2: Time (h)"]
 illumination_sensor = df["Run 2: Illumination (lux)"]
@@ -210,7 +210,21 @@ for i in range(len(time_sensor)):
 
 # Adding the Stellarium data
 
-stellarium_lightcurve = np.genfromtxt("Stellarium/stellarium_lightcurve.csv", delimiter=",")
+stellarium_lightcurve = np.genfromtxt("../Stellarium/stellarium_lightcurve.csv", delimiter=",")
+
+# Adding the theoretical models
+
+str2date = lambda x: pd.Timestamp(datetime.datetime.fromtimestamp(datetime.datetime.timestamp(datetime.datetime.fromisoformat(x)), datetime.timezone.utc)).to_julian_date()
+rsun_1p00 = np.genfromtxt("../EclipseModels/tse_radius_1.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p05 = np.genfromtxt("../EclipseModels/tse_radius_1.05.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p10 = np.genfromtxt("../EclipseModels/tse_radius_1.1.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p15 = np.genfromtxt("../EclipseModels/tse_radius_1.15.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p20 = np.genfromtxt("../EclipseModels/tse_radius_1.2.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p25 = np.genfromtxt("../EclipseModels/tse_radius_1.25.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p30 = np.genfromtxt("../EclipseModels/tse_radius_1.3.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p35 = np.genfromtxt("../EclipseModels/tse_radius_1.35.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p40 = np.genfromtxt("../EclipseModels/tse_radius_1.4.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
+rsun_1p45 = np.genfromtxt("../EclipseModels/tse_radius_1.45.csv", delimiter=",", converters = {0: str2date}, encoding="utf-8")
 
 
 """Ratios For Data Conservation"""
@@ -247,7 +261,7 @@ print("Radio Obscuration Minimum: ",low)
 
 
 plt.figure(figsize=(12, 8)) 
-widthline = 3
+widthline = 2
 
 #Radio Telescope Plots
 #Frame 1: raw
@@ -264,16 +278,30 @@ widthline = 3
 #plt.plot(date, r_pol_filter, label = "Smoothed Radio Data", color = 'Green', linewidth=widthline)#RADIO Smoothed/Normalization
 
 #Frame 5: Smoothed/Normalized
-#plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Green', linewidth=widthline)#RADIO Smoothed/Normalization
+
 
 #Light Sensor Plots
-plt.plot(jd_sensor, normal_illumination_sensor, label = "Light Sensor Lightcurve (Normalized)", linewidth=widthline)#Light Sensor Visible Data
+#plt.plot(jd_sensor, normal_illumination_sensor, label = "Light Sensor Lightcurve (Normalized)", linewidth=widthline)#Light Sensor Visible Data
 
 #Stellarium Theoretical Plots
-plt.plot(stellarium_lightcurve[:,0], 100-stellarium_lightcurve[:,1], label = "Theoretical Lightcurve (Stellarium)", color = "orange", linewidth=widthline)#Stellarium Data
+#plt.plot(stellarium_lightcurve[:,0], 100-stellarium_lightcurve[:,1], label = "Theoretical Lightcurve (Stellarium)", color = "orange", linewidth=widthline)#Stellarium Data
 
 #Livestream Plots
-plt.plot(clocktime, percentcount, label = "Livestream Lightcurve (Normalized)", color = "blue", linewidth=widthline/2)#Visual Data
+#plt.plot(clocktime, percentcount, label = "Livestream Lightcurve (Normalized)", color = "blue", linewidth=widthline/2)#Visual Data
+
+#"Real" theoretical lightcurve
+plt.plot(rsun_1p00[:,0], 100*rsun_1p00[:,1], label = "R/Rsun = 1.0", linewidth=widthline)
+plt.plot(rsun_1p05[:,0], 100*rsun_1p05[:,1], label = "R/Rsun = 1.05", linewidth=widthline)
+plt.plot(rsun_1p10[:,0], 100*rsun_1p10[:,1], label = "R/Rsun = 1.1", linewidth=widthline)
+plt.plot(rsun_1p15[:,0], 100*rsun_1p15[:,1], label = "R/Rsun = 1.15", linewidth=widthline)
+plt.plot(rsun_1p20[:,0], 100*rsun_1p20[:,1], label = "R/Rsun = 1.20", linewidth=widthline)
+plt.plot(rsun_1p25[:,0], 100*rsun_1p25[:,1], label = "R/Rsun = 1.25", linewidth=widthline)
+plt.plot(rsun_1p30[:,0], 100*rsun_1p30[:,1], label = "R/Rsun = 1.30", linewidth=widthline)
+plt.plot(rsun_1p35[:,0], 100*rsun_1p35[:,1], label = "R/Rsun = 1.35", linewidth=widthline)
+plt.plot(rsun_1p40[:,0], 100*rsun_1p40[:,1], label = "R/Rsun = 1.40", linewidth=widthline)
+plt.plot(rsun_1p45[:,0], 100*rsun_1p45[:,1], label = "R/Rsun = 1.45", linewidth=widthline)
+
+plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Green', linewidth=3)#RADIO Smoothed/Normalization
 
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
 plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
@@ -286,13 +314,13 @@ labelsize = 25
 ticksize = 20
 legendsize = 14
 
-plt.title("Visible Lightcurve Data Analysis", fontsize = titlesize)
+plt.title("Radio Lightcurve Data Analysis", fontsize = titlesize)
 plt.xlabel('Julian Date', fontsize = labelsize)
 plt.ylabel('Percent Obscuration', fontsize = labelsize)
 plt.xticks(fontsize = ticksize)
 plt.yticks(fontsize = ticksize)
 plt.ylim(-5,120)
 plt.xlim(2460409.16,2460409.39)
-plt.legend(fontsize = legendsize, loc='lower left')
-plt.savefig("OpticalFrame3.png")
+plt.legend(fontsize = legendsize, frameon=False, loc='lower left')
+plt.savefig("RadioRadiusComparison.png")
 plt.show()
