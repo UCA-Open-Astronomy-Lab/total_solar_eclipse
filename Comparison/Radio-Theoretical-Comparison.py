@@ -54,28 +54,28 @@ for i in range(len(date)):
         #print("found 1st index", index_1st)
         break
 
-#Finds 2nd contact index
+# Finds 2nd contact index
 for i in range(len(date)):
     if (contact2nd - date[i]) < epsilon:
         index_2nd = i
         #print("found 2nd index", index_2nd)
         break
 
-#Finds 3rd contact index
+# Finds 3rd contact index
 for i in range(len(date)):
     if (contact3rd - date[i]) < epsilon:
         index_3rd = i
         #print("found 3rd index", index_3rd)
         break
 
-#Finds 4th contact index
+# Finds 4th contact index
 for i in range(len(date)):
     if (contact4th - date[i]) < epsilon:
         index_4th = i
         #print("found 4th index", index_4th)
         break
 
-#Finds final data index
+# Finds final data index
 for i in range(len(date)):
     if (final - date[i]) < epsilon:
         index_final = i
@@ -102,15 +102,15 @@ post_average = sum/dif
 # Calculates how much the last values in the data need to be adjusted
 adj_num = pre_average - post_average
 
-#Creates the linear adjustment function
+# Creates the linear adjustment function
 m = adj_num/(date[-1]- date[index_1st])
 adjustment_function = []
 
-#This part sets the part of the function from 0 to 1st contact to 0 as to not effect that first part with the adjustment function.
+# This part sets the part of the function from 0 to 1st contact to 0 as to not effect that first part with the adjustment function.
 for i in range(0, index_1st):
     adjustment_function.append(0)
 
-#This part is the adjustment function, which affects the data from 1st contact to the last point of data.
+# This part is the adjustment function, which affects the data from 1st contact to the last point of data.
 for i in range(index_1st, index_final+1):
     adjustment_function.append(m*(date[i]- date[index_1st]))
 
@@ -121,7 +121,7 @@ def read_lines():
         for row in reader:
             yield [ float(i) for i in row ]
 
-#time and count lists
+# Time and count lists
 xy = list(read_lines())
 count = xy[0][:]
 time = xy[1][:]
@@ -185,13 +185,13 @@ plt.figure(figsize=(10, 5))
 widthline = 2
 
 # Smoothed and Normalized Radio Data
-plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'black', linewidth=widthline)#RADIO Smoothed/Normalization
+plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'green', linewidth=widthline)#RADIO Smoothed/Normalization
 
 # Theoretical Plots
 plt.plot(rsun_1[:,0], 100*rsun_1[:,1], label = "R/Rsun = 1", color = "blue", linewidth=widthline)
-plt.plot(rsun_1p20[:,0], 100*rsun_1p20[:,1], label = "R/Rsun = 1.2", color = "cyan", linewidth=widthline)
-plt.plot(rsun_1p27[:,0], 100*rsun_1p27[:,1], label = "R/Rsun = 1.27", color = "magenta", linewidth=widthline)
-plt.plot(rsun_1p45[:,0], 100*rsun_1p45[:,1], label = "R/Rsun = 1.45", color = "green", linewidth=widthline)
+plt.plot(rsun_1p20[:,0], 100*rsun_1p20[:,1], label = "R/Rsun = 1.2", color = "brown", linewidth=widthline)
+plt.plot(rsun_1p27[:,0], 100*rsun_1p27[:,1], label = "R/Rsun = 1.27", color = "black", linewidth=widthline)
+plt.plot(rsun_1p45[:,0], 100*rsun_1p45[:,1], label = "R/Rsun = 1.45", color = "orange", linewidth=widthline)
 
 
 plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
@@ -199,13 +199,13 @@ plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
 plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
 plt.axvline(x = date[index_4th], color = 'r', linestyle = '-') #4th contact
 
-#Design
+# Design
 titlesize = 30
 labelsize = 15
 ticksize = 15
 legendsize = 10
 
-plt.title("Radio Lightcurve Fitting", fontsize = titlesize)
+plt.title("Radio vs Theoretical Curves", fontsize = titlesize)
 plt.xlabel('Julian Date', fontsize = labelsize)
 plt.ylabel('Percent Obscuration', fontsize = labelsize)
 plt.xticks(fontsize = ticksize)
