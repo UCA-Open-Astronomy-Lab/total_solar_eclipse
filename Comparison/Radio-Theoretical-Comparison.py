@@ -184,35 +184,37 @@ rsun_1p45 = np.genfromtxt("EclipseModels/tse_radius_1.45.csv", delimiter="," , c
 plt.figure(figsize=(10, 5)) 
 widthline = 2
 
-# Smoothed and Normalized Radio Data
-plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'green', linewidth=widthline)#RADIO Smoothed/Normalization
-
-# Theoretical Plots
-plt.plot(rsun_1[:,0], 100*rsun_1[:,1], label = "R/Rsun = 1", color = "blue", linewidth=widthline)
-plt.plot(rsun_1p20[:,0], 100*rsun_1p20[:,1], label = "R/Rsun = 1.2", color = "brown", linewidth=widthline)
-plt.plot(rsun_1p27[:,0], 100*rsun_1p27[:,1], label = "R/Rsun = 1.27", color = "black", linewidth=widthline)
-plt.plot(rsun_1p45[:,0], 100*rsun_1p45[:,1], label = "R/Rsun = 1.45", color = "orange", linewidth=widthline)
-
-
-plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
-plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
-plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
-plt.axvline(x = date[index_4th], color = 'r', linestyle = '-') #4th contact
-
 # Design
 titlesize = 30
 labelsize = 15
-ticksize = 15
+ticksize = 10
 legendsize = 10
 
-plt.title("Radio vs Theoretical Curves", fontsize = titlesize)
-plt.xlabel('Julian Date', fontsize = labelsize)
+# Smoothed and Normalized Radio Data
+plt.plot(date - 2.460409e6, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'green', linewidth=widthline)#RADIO Smoothed/Normalization
+
+# Theoretical Plots
+plt.plot(rsun_1[:,0] - 2.460409e6, 100*rsun_1[:,1], label = "R/Rsun = 1", color = "blue", linewidth=widthline)
+plt.plot(rsun_1p20[:,0] - 2.460409e6, 100*rsun_1p20[:,1], label = "R/Rsun = 1.2", color = "brown", linewidth=widthline)
+plt.plot(rsun_1p27[:,0] - 2.460409e6, 100*rsun_1p27[:,1], label = "R/Rsun = 1.27", color = "black", linewidth=widthline)
+plt.plot(rsun_1p45[:,0] - 2.460409e6, 100*rsun_1p45[:,1], label = "R/Rsun = 1.45", color = "orange", linewidth=widthline)
+
+
+plt.axvline(x = date[index_1st] - 2.460409e6, color = 'r', linestyle = '-') #1st contact
+plt.axvline(x = date[index_2nd] - 2.460409e6, color = 'r', linestyle = '-') #2nd contact
+plt.axvline(x = date[index_3rd] - 2.460409e6, color = 'r', linestyle = '-') #3rd contact
+plt.axvline(x = date[index_4th] - 2.460409e6, color = 'r', linestyle = '-') #4th contact
+
+#plt.title("Radio vs Theoretical Curves", fontsize = titlesize)
+plt.xlabel('Julian Date - 2460409', fontsize = labelsize)
 plt.ylabel('Percent Obscuration', fontsize = labelsize)
+plt.ticklabel_format(useOffset=False)
 plt.xticks(fontsize = ticksize)
 plt.yticks(fontsize = ticksize)
-#plt.ylim(-5,120)
-plt.xlim(2460409.16,2460409.39)
+plt.ylim(-5,120)
+#plt.xlim(2460409.16  - 2.460409e6,2460409.39 - 2.460409e6)
+plt.xlim(0.215,0.35)
 plt.legend(fontsize = legendsize, loc='lower left')
 plt.tight_layout()
-plt.savefig("RadioVsTheoretical.png")
+plt.savefig("RadioVsTheoretical.pdf")
 plt.show()
