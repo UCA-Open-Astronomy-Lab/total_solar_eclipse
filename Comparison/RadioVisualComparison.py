@@ -104,6 +104,8 @@ adj_num = pre_average - post_average
 
 #Creates the linear adjustment function
 m = adj_num/(date[-1]- date[index_1st])
+print(m)
+print(date[index_1st])
 adjustment_function = []
 
 #This part sets the part of the function from 0 to 1st contact to 0 as to not effect that first part with the adjustment function.
@@ -116,7 +118,7 @@ for i in range(index_1st, index_final+1):
 
 """Making Visual Data counts into percentage"""
 def read_lines():
-    with open('data/PixelCount.csv', 'rU') as data:
+    with open('data/PixelCount.csv', 'r') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
@@ -127,12 +129,12 @@ count = xy[0][:]
 time = xy[1][:]
 
 def read_lines2():
-    with open('Time Test/timeframe test/clockjd.csv', 'rU') as data:
+    with open('Time Test/timeframe test/clockjd.csv', 'r') as data:
         reader = csv.reader(data)
         for row in reader:
             yield [ float(i) for i in row ]
 x = list(read_lines2())
-clocktime = x[0][:]
+clocktime = np.array(x[0][:])
 
 cti1 = 0
 cti2 = 0
@@ -206,12 +208,14 @@ for i in range(len(time_sensor)):
     jd = pdts.to_julian_date()
     jd_sensor.append(jd)
 
+jd_sensor = np.array(jd_sensor)
+
 
 
 # Adding the Stellarium data
 
 stellarium_lightcurve = np.genfromtxt("Stellarium/stellarium_lightcurve.csv", delimiter=",")
-
+stellarium_lightcurve = np.array(stellarium_lightcurve)
 
 """Ratios For Data Conservation"""
 '''
@@ -246,53 +250,61 @@ print("Radio Obscuration Minimum: ",low)
 '''colors: green, black, orange, blue, red '''
 
 
-plt.figure(figsize=(12, 8)) 
+plt.figure(figsize=(10, 5)) 
 widthline = 3
-
+dateadjust = 2460409
 #Radio Telescope Plots
 #Frame 1: raw
-#plt.plot(date, r_pol, label = "Raw Radio Data", color = 'Green', linewidth=widthline)#RADIO raw
+#plt.plot(date, r_pol, label = "Raw Radio Data", color = 'Green', linewidth=widthline/2)#RADIO raw
 
 #Frame 2: raw, adjustment function
-#plt.plot(date, r_pol, label = "Raw Radio Data", color = 'Green', linewidth=widthline)#RADIO raw
-#plt.plot(date, adjustment_function, label = "Tracking Adjustment Function", linewidth=widthline)#RADIO raw
+#plt.plot(date - dateadjust, r_pol, label = "Raw Radio Data", color = 'Green', linewidth=widthline/2)#RADIO raw
+#plt.plot(date- dateadjust, adjustment_function, label = "Tracking Adjustment Function", linewidth=widthline)#RADIO raw
 
 #Frame 3: adjusted radio data
-#plt.plot(date, r_pol + adjustment_function, label = "Adjusted Radio Data", color = 'Green', linewidth=widthline)#RADIO raw
+#plt.plot(date, r_pol + adjustment_function, label = "Adjusted Radio Data", color = 'Green', linewidth=widthline/2)#RADIO raw
 
 #Frame 4: Smoothed
 #plt.plot(date, r_pol_filter, label = "Smoothed Radio Data", color = 'Green', linewidth=widthline)#RADIO Smoothed/Normalization
 
 #Frame 5: Smoothed/Normalized
-#plt.plot(date, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Green', linewidth=widthline)#RADIO Smoothed/Normalization
+#plt.plot(date - dateadjust, normalization(r_pol_filter), label = "Smoothed/Normalized Radio Data", color = 'Green', linewidth=widthline)#RADIO Smoothed/Normalization
 
 #Light Sensor Plots
-plt.plot(jd_sensor, normal_illumination_sensor, label = "Light Sensor Lightcurve (Normalized)", linewidth=widthline)#Light Sensor Visible Data
+plt.plot(jd_sensor - dateadjust, normal_illumination_sensor, label = "Light Sensor Lightcurve (Normalized)", linewidth=widthline, color = "green")#Light Sensor Visible Data
 
 #Stellarium Theoretical Plots
-plt.plot(stellarium_lightcurve[:,0], 100-stellarium_lightcurve[:,1], label = "Theoretical Lightcurve (Stellarium)", color = "orange", linewidth=widthline)#Stellarium Data
+plt.plot(stellarium_lightcurve[:,0]- dateadjust, 100-stellarium_lightcurve[:,1], label = "Theoretical Lightcurve (Stellarium)", color = "orange", linewidth=widthline)#Stellarium Data
 
 #Livestream Plots
-plt.plot(clocktime, percentcount, label = "Livestream Lightcurve (Normalized)", color = "blue", linewidth=widthline/2)#Visual Data
+plt.plot(clocktime - dateadjust, percentcount, label = "Livestream Lightcurve (Normalized)", color = "blue", linewidth=widthline)#Visual Data
 
-plt.axvline(x = date[index_1st], color = 'r', linestyle = '-') #1st contact
-plt.axvline(x = date[index_2nd], color = 'r', linestyle = '-') #2nd contact
-plt.axvline(x = date[index_3rd], color = 'r', linestyle = '-') #3rd contact
-plt.axvline(x = date[index_4th], color = 'r', linestyle = '-') #4th contact
+plt.axvline(x = date[index_1st]-dateadjust, color = 'r', linestyle = '-') #1st contact
+plt.axvline(x = date[index_2nd]-dateadjust, color = 'r', linestyle = '-') #2nd contact
+plt.axvline(x = date[index_3rd]-dateadjust, color = 'r', linestyle = '-') #3rd contact
+plt.axvline(x = date[index_4th]-dateadjust, color = 'r', linestyle = '-') #4th contact
 
 #Design
 titlesize = 35
-labelsize = 25
-ticksize = 20
-legendsize = 14
+labelsize = 15
+ticksize = 10
+legendsize = 10
 
-plt.title("Visible Lightcurve Data Analysis", fontsize = titlesize)
-plt.xlabel('Julian Date', fontsize = labelsize)
-plt.ylabel('Percent Obscuration', fontsize = labelsize)
+#plt.title("Radio vs Optical Lightcurve", fontsize = titlesize)
+plt.xlabel('Julian Date - 2460409', fontsize = labelsize)
+plt.ylabel('Relative Brightness', fontsize = labelsize)
 plt.xticks(fontsize = ticksize)
 plt.yticks(fontsize = ticksize)
+#plt.ticklabel_format(useOffset = "false")
+
+
 plt.ylim(-5,120)
-plt.xlim(2460409.16,2460409.39)
+#plt.xlim(2460409.16-dateadjust,2460409.39-dateadjust)#For optical lightsensor only
+#plt.xlim(0.215,0.35)#For Radio only
+plt.xlim(0.20,0.35)#For livestream only
+
+
+
 plt.legend(fontsize = legendsize, loc='lower left')
-plt.savefig("OpticalFrame3.png")
+plt.savefig("OpticalComparison.pdf")
 plt.show()
